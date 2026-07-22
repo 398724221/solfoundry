@@ -70,4 +70,4 @@ defaults);
       function openTaskModal(id=null){
         editingTaskId=id; const t=id?state.tasks.find(x=>x.id===id):null;
         el('taskModalTitle').textContent=t?'编辑工作事项':'添加工作事项';
-        el('taskProject').value=t?.project||''; el('taskZone').value=t?.zone||'plan'; el('taskTitle').value=t?.title||''; el('taskStandard').value=
+        el('taskProject').value=t?.project||''; el('taskZone').value=t?.zone||'plan'; el('taskTitle').value=t?.title||''; el('taskStandard').value
