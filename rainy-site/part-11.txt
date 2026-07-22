@@ -1,0 +1,14 @@
+什么');return;}state.rescue.unshift({id:uid(),title,impact:el('rescueImpact').value.trim()||'影响待判断'});el('rescueInput').value='';el('rescueImpact').value='';save();closeModal('rescueModal');renderRescue();renderPrompts();};
+      el('captureAddBtn').onclick=()=>addCapture();el('captureInput').onkeydown=e=>{if(e.key==='Enter')addCapture();};el('voiceBtn').onclick=()=>voiceTo('captureInput',el('voiceBtn'));
+      el('addProjectBtn').onclick=()=>openModal('projectModal');el('saveProjectBtn').onclick=()=>{const name=el('projectName').value.trim(),owner=el('projectOwner').value.trim();if(!name||!owner){toast('负责人和项目名称都要填写');return;}state.projects.push({id:uid(),owner,name,kpi:el('projectKpi').value.trim(),progress:+el('projectProgress').value||0,risk:el('projectRisk').value,riskText:el('projectRiskText').value.trim()||'待判断',next:el('projectNext').value.trim()||'待确定',updated:'刚刚'});save();closeModal('projectModal');renderProjects();};
+      el('projectSearch').oninput=renderProjects;el('riskFilter').onchange=renderProjects;
+      ['weekFocus','mondayNote','thursdayNote','stopDoing'].forEach(id=>el(id).oninput=e=>{const map={weekFocus:'focus',mondayNote:'monday',thursdayNote:'thursday',stopDoing:'stop'};state.week[map[id]]=e.target.value;save();});
+      el('reviewRaw').oninput=e=>{state.reviewDraft.raw=e.target.value;save();};el('reviewAnswers').oninput=e=>{state.reviewDraft.answers=e.target.value;save();};el('reviewVoiceBtn').onclick=()=>voiceTo('reviewRaw',el('reviewVoiceBtn'));el('generateReviewBtn').onclick=generateReview;el('saveReviewBtn').onclick=saveReview;
+      el('exportBtn').onclick=exportJson;el('exportJsonBtn').onclick=exportJson;el('exportMarkdownBtn').onclick=exportMarkdown;
+      el('settingsBtn').onclick=()=>openModal('settingsModal');el('saveSettingsBtn').onclick=saveSettings;
+      setInterval(setScene,60000);
+      renderAll();
+    })();
+  </script>
+</body>
+</html>
