@@ -1,0 +1,85 @@
+"rescue-icon">🔥</div>
+          <div><strong id="rescueTitle">目前没有需要立即接管的救火事项</strong><p id="rescueNote">新的微信、飞书消息先进入收集箱；由项目影响而不是消息声音决定优先级。</p></div>
+          <button class="btn peach" id="addRescueBtn">添加临时事项</button>
+        </div>
+
+        <div class="section-head">
+          <div><div class="kicker">03 · 让生活进入真实日程</div><h2>今天的柔性节奏</h2><p>健身、吃饭和恢复不是工作完成后的奖励，而是工作系统的一部分。</p></div>
+        </div>
+        <div class="grid main-side">
+          <div class="card pad"><div class="timeline" id="timeline"></div></div>
+          <div class="card pad">
+            <div class="baselines" id="baselines"></div>
+            <div style="height:13px"></div>
+            <div class="capture-box">
+              <input class="input" id="captureInput" placeholder="想到什么先扔进来，不要求分类…" />
+              <button class="btn mint" id="voiceBtn">语音</button>
+              <button class="btn" id="captureAddBtn">收进去</button>
+            </div>
+            <div class="capture-list" id="captureList"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-projects">
+        <div class="section-head">
+          <div><div class="kicker">PROJECT RADAR</div><h2>先看风险，再看全部项目</h2><p>你管理 15+ 个项目，首页不需要展示全部细节；只把需要介入的事情推到前面。</p></div>
+          <button class="btn primary" id="addProjectBtn">添加项目</button>
+        </div>
+        <div class="grid main-side">
+          <div class="card pad">
+            <div class="card-header"><strong>最高优先级风险 · Top 5</strong><span class="chip">由 KPI 影响、截止时间与是否需拍板综合排序</span></div>
+            <div class="risk-list" id="riskList"></div>
+          </div>
+          <div class="garden" id="garden">
+            <div class="garden-sun" id="gardenSun"></div><div class="garden-cloud"></div>
+            <div class="plant" style="--x:38%;--h:52px"></div>
+            <div class="plant" style="--x:55%;--h:75px"></div>
+            <div class="plant" style="--x:73%;--h:96px"></div>
+            <div class="garden-copy"><strong>你的世界正在变亮</strong><span id="gardenText">英语、健身、值得的时刻，会让这里慢慢生长。</span></div>
+          </div>
+        </div>
+
+        <div class="section-head"><div><div class="kicker">ALL ACTIVE PROJECTS</div><h2>按负责人查看项目</h2><p>每个客户就是一个项目；合同目标、当前进度、风险和下一动作放在同一行。</p></div></div>
+        <div class="card pad task-table-wrap">
+          <div class="project-toolbar"><input class="input" id="projectSearch" placeholder="搜索项目或负责人…" style="max-width:330px"/><select class="select" id="riskFilter" style="max-width:190px"><option value="all">全部风险</option><option value="high">交付风险</option><option value="mid">需要关注</option><option value="low">正常推进</option></select></div>
+          <table class="project-table"><thead><tr><th>负责人 / 项目</th><th>本期目标</th><th>当前进度</th><th>最大风险</th><th>下一动作</th><th>最近更新</th></tr></thead><tbody id="projectBody"></tbody></table>
+        </div>
+      </section>
+
+      <section class="page" id="page-week">
+        <div class="section-head"><div><div class="kicker">WEEKLY RHYTHM</div><h2>周一定方向，周四改系统</h2><p>不是每天催全部项目，而是在固定节点确认目标、偏差与需要你作出的决定。</p></div></div>
+        <div class="grid two">
+          <div class="card pad">
+            <label class="label">本周最重要的一个结果</label>
+            <textarea class="textarea" id="weekFocus" placeholder="本周结束时，团队和项目必须真实发生什么？"></textarea>
+            <label class="label" style="margin-top:12px">周一：目标与已知风险</label>
+            <textarea class="textarea" id="mondayNote" placeholder="只记录真正会影响本周结果的内容。"></textarea>
+          </div>
+          <div class="card pad">
+            <label class="label">周四：目标与现实偏在哪里</label>
+            <textarea class="textarea" id="thursdayNote" placeholder="偏差、根因、决策，以及下次如何减少对你的依赖。"></textarea>
+            <label class="label" style="margin-top:12px">本周要停止的低价值工作</label>
+            <textarea class="textarea" id="stopDoing" placeholder="哪些工作可以取消、授权、集中处理或降低标准？"></textarea>
+          </div>
+        </div>
+        <div class="section-head"><div><div class="kicker">SYSTEM IMPROVEMENTS</div><h2>效率不是做得更快，而是下次不再重复消耗</h2></div></div>
+        <div class="grid three">
+          <div class="card pad"><strong>取消</strong><p style="color:var(--muted);font-size:12px">不影响合同 KPI、客户关系和长期资产的事项，不必继续存在。</p></div>
+          <div class="card pad"><strong>授权</strong><p style="color:var(--muted);font-size:12px">记录为什么必须由你做，持续发现可以交还给负责人的环节。</p></div>
+          <div class="card pad"><strong>沉淀</strong><p style="color:var(--muted);font-size:12px">同类问题第二次出现时，就应该变成规则、模板、SOP 或案例。</p></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-review">
+        <div class="section-head">
+          <div><div class="kicker">FIVE-MINUTE CLOSE</div><h2>先自由说，再由系统追问</h2><p>不要求你写长篇日记。说清今天发生了什么，剩下的结构交给系统。</p></div>
+          <button class="btn primary" id="saveReviewBtn">保存今日记录</button>
+        </div>
+        <div class="grid main-side">
+          <div class="card pad">
+            <div class="capture-box" style="grid-template-columns:1fr auto">
+              <textarea class="textarea" id="reviewRaw" placeholder="可以直接说：今天做了什么、哪个项目让我烦、有什么新判断、明天还挂着什么……"></textarea>
+              <button class="btn mint" id="reviewVoiceBtn">开始语音</button>
+            </div>
+            <div class="section-head" style="ma
