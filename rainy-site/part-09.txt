@@ -1,0 +1,60 @@
+=t?.standard||''; el('taskWhy').value=t?.why||''; el('taskDue').value=t?.due||''; el('taskEstimate').value=t?.estimate||''; el('deleteTaskBtn').hidden=!t;
+        el('taskModal').classList.add('open');
+      }
+      function saveTask(){
+        const title=el('taskTitle').value.trim(), standard=el('taskStandard').value.trim();
+        if(!title){toast('先写清楚具体要解决什么');return;} if(!standard){toast('完成标准是必填项');return;}
+        const data={project:el('taskProject').value.trim(),zone:el('taskZone').value,title,standard,why:el('taskWhy').value.trim(),due:el('taskDue').value,estimate:el('taskEstimate').value.trim()};
+        if(editingTaskId) Object.assign(state.tasks.find(x=>x.id===editingTaskId),data); else state.tasks.push({id:uid(),selected:false,...data});
+        save();closeModal('taskModal');renderTasks();toast('已更新决策池');
+      }
+
+      function quickAdd(){
+        const title=el('quickTitle').value.trim(), standard=el('quickStandard').value.trim();
+        if(!title||!standard){toast('事项和完成标准都要写清楚');return;}
+        state.tasks.push({id:uid(),project:el('quickProject').value.trim()||'未分类',title,standard,why:'',due:'',estimate:'',zone:'plan',selected:false});
+        ['quickTitle','quickStandard','quickProject'].forEach(id=>el(id).value='');save();renderTasks();
+      }
+
+      function renderRescue(){
+        const r=state.rescue[0]; el('rescueTitle').textContent=r?r.title:'目前没有需要立即接管的救火事项'; el('rescueNote').textContent=r?r.impact:'新的微信、飞书消息先进入收集箱；由项目影响而不是消息声音决定优先级。';
+      }
+      function renderTimeline(){ el('timeline').innerHTML=state.timeline.map(t=>`<div class="time-row ${t.type==='protected'?'protected':t.type==='meal'?'meal':''}"><div class="time">${esc(t.time)}</div><div><strong>${esc(t.title)}</strong><span>${esc(t.note)}</span></div><span class="mini">${t.type==='protected'?'建议保护':t.type==='meal'?'生活底线':'工作区间'}</span></div>`).join(''); }
+      const baselineMeta={english:['英语','灵格 AI 最低学习'],gym:['健身','周一至周五'],moment:['值得的时刻','留下一件幸运或开心'],off:['按时下班','不靠无效时长证明努力']};
+      function renderBaselines(){
+        el('baselines').innerHTML=Object.entries(baselineMeta).map(([k,v])=>`<label class="baseline ${state.baselines[k]?'done':''}"><input type="checkbox" data-base="${k}" ${state.baselines[k]?'checked':''}><div><strong>${v[0]}</strong><span>${v[1]}</span></div></label>`).join('');
+        document.querySelectorAll('[data-base]').forEach(x=>x.onchange=()=>{state.baselines[x.dataset.base]=x.checked;save();renderBaselines();renderGarden();});
+      }
+      function renderGarden(){
+        const score=Object.values(state.baselines).filter(Boolean).length;
+        document.querySelectorAll('.plant').forEach((p,i)=>p.style.transform=`scaleY(${.65+score*.09+i*.02})`);
+        el('gardenSun').style.transform=`translateY(${-score*3}px) scale(${.92+score*.025})`;
+        el('gardenText').textContent=score===0?'英语、健身、值得的时刻，会让这里慢慢生长。':score<3?'今天已经有一些真实生活被保留下来了。':'工作在推进，生活也没有被牺牲。';
+      }
+
+      function addCapture(text){
+        const value=(text??el('captureInput').value).trim(); if(!value)return;
+        state.captures.unshift({id:uid(),text:value,at:new Date().toISOString()}); el('captureInput').value=''; save(); renderCaptures();
+      }
+      function renderCaptures(){
+        el('captureList').innerHTML=state.captures.length?state.captures.slice(0,5).map(c=>`<div class="capture-item"><div><span>${esc(c.text)}</span><br><small>${new Date(c.at).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})}</small></div><button class="btn small capture-remove" data-id="${c.id}">整理</button></div>`).join(''):'<div class="empty">临时想法会先安全落在这里。</div>';
+        document.querySelectorAll('.capture-remove').forEach(b=>b.onclick=()=>{state.captures=state.captures.filter(x=>x.id!==b.dataset.id);save();renderCaptures();});
+      }
+
+      function riskScore(p){ return (p.risk==='high'?300:p.risk==='mid'?200:100)+(100-p.progress); }
+      function renderRisks(){
+        const list=[...state.projects].sort((a,b)=>riskScore(b)-riskScore(a)).slice(0,5);
+        el('riskList').innerHTML=list.map((p,i)=>`<div class="risk-item"><div class="risk-rank">${i+1}</div><div><strong>${esc(p.name)}</strong><span>负责人：${esc(p.owner)}</span></div><div class="risk-detail"><strong>${esc(p.riskText)}</strong><span>下一步：${esc(p.next)}</span></div><div class="risk-level ${p.risk}">${p.risk==='high'?'交付风险':p.risk==='mid'?'需要关注':'正常推进'}</div></div>`).join('')||'<div class="empty">暂无项目</div>';
+      }
+      function renderProjects(){
+        const q=el('projectSearch').value.trim().toLowerCase(), filter=el('riskFilter').value;
+        const list=state.projects.filter(p=>(filter==='all'||p.risk===filter)&&(!q||`${p.owner} ${p.name}`.toLowerCase().includes(q))).sort((a,b)=>a.owner.localeCompare(b.owner,'zh-CN'));
+        let last=''; let html='';
+        list.forEach(p=>{ if(p.owner!==last){last=p.owner;html+=`<tr class="owner-group"><td colspan="6">${esc(p.owner)} · ${list.filter(x=>x.owner===p.owner).length} 个项目</td></tr>`;} html+=`<tr><td><strong>${esc(p.name)}</strong></td><td>${esc(p.kpi)}</td><td><div style="display:flex;align-items:center;gap:8px"><div class="progress"><i style="width:${Math.max(0,Math.min(100,p.progress))}%"></i></div><span>${p.progress}%</span></div></td><td><span class="risk-level ${p.risk}">${p.risk==='high'?'交付风险':p.risk==='mid'?'需要关注':'正常推进'}</span><div style="margin-top:4px;color:var(--muted);max-width:230px">${esc(p.riskText)}</div></td><td>${esc(p.next)}</td><td>${esc(p.updated)}</td></tr>`; });
+        el('projectBody').innerHTML=html||'<tr><td colspan="6"><div class="empty">没有符合筛选条件的项目。</div></td></tr>'; renderRisks();
+      }
+
+      function renderWeek(){ el('weekFocus').value=state.week.focus;el('mondayNote').value=state.week.monday;el('thursdayNote').value=state.week.thursday;el('stopDoing').value=state.week.stop; }
+      function renderPrompts(){
+        const selected=selectedTasks(); const prompts=[];
+        if(selected[0])prompts.push(`今天在「${selected
