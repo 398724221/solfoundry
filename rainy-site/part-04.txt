@@ -1,0 +1,112 @@
+ont-size:12px; }
+
+    .memory-list { display:grid; gap:10px; }
+    .memory-card { padding:14px; border-radius:16px; background:rgba(255,255,255,.74); border:1px solid rgba(47,91,116,.08); }
+    .memory-card time { color:var(--muted); font-size:10px; }
+    .memory-card h3 { margin:4px 0 7px; font-size:14px; }
+    .memory-card p { margin:4px 0; color:#526a7c; font-size:11px; white-space:pre-wrap; }
+
+    .empty { padding:22px; text-align:center; color:var(--muted); font-size:12px; border:1px dashed var(--line-strong); border-radius:15px; background:rgba(255,255,255,.35); }
+    .modal { position:fixed; inset:0; z-index:100; display:none; place-items:center; padding:18px; background:rgba(52,80,96,.28); backdrop-filter:blur(8px); }
+    .modal.open { display:grid; }
+    .modal-card { width:min(700px,100%); max-height:90vh; overflow:auto; background:#fffdf8; border-radius:25px; box-shadow:0 30px 90px rgba(42,78,98,.25); padding:22px; }
+    .modal-head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:16px; }
+    .modal-head h3 { margin:0; }
+    .form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:11px; }
+    .form-group.full { grid-column:1/-1; }
+    .label { display:block; margin:0 0 5px; color:var(--muted); font-size:11px; font-weight:750; }
+    .modal-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:15px; }
+    .toast { position:fixed; right:18px; bottom:18px; z-index:200; padding:11px 14px; border-radius:14px; background:#18324a; color:white; box-shadow:0 12px 32px rgba(24,50,74,.25); transform:translateY(18px); opacity:0; transition:.22s ease; font-size:12px; }
+    .toast.show { transform:none; opacity:1; }
+
+    @media (max-width:1100px) {
+      .brand-copy { display:none; }
+      .hero { grid-template-columns:1fr; }
+      .grid.main-side { grid-template-columns:1fr; }
+      .priority-board { grid-template-columns:repeat(2,minmax(260px,1fr)); }
+      .baselines { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    }
+    @media (max-width:720px) {
+      .shell { width:min(100% - 16px,1480px); padding-top:8px; }
+      .topbar { top:6px; grid-template-columns:auto minmax(0,1fr) auto; padding:8px; border-radius:17px; }
+      .nav { justify-content:flex-start; }
+      .nav-btn { padding:8px 9px; font-size:12px; }
+      .top-actions .desktop-only { display:none; }
+      .hero { padding:25px 19px; border-radius:23px; }
+      .hero h1 { font-size:40px; }
+      .grid.two, .grid.three { grid-template-columns:1fr; }
+      .priority-board { grid-template-columns:1fr; overflow:visible; }
+      .quick-add { grid-template-columns:1fr; }
+      .baselines { grid-template-columns:1fr; }
+      .capture-box { grid-template-columns:1fr 1fr; }
+      .capture-box input { grid-column:1/-1; }
+      .risk-item { grid-template-columns:auto 1fr auto; }
+      .risk-item .risk-detail { grid-column:2/-1; }
+      .time-row { grid-template-columns:75px 1fr; }
+      .time-row > .mini { display:none; }
+      .form-grid { grid-template-columns:1fr; }
+      .form-group.full { grid-column:auto; }
+      .section-head { align-items:flex-start; flex-direction:column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">R</div>
+        <div class="brand-copy"><strong>RAINY LIVING WORLD</strong><span>Work cockpit · Growth companion</span></div>
+      </div>
+      <nav class="nav" aria-label="主导航">
+        <button class="nav-btn active" data-page="cockpit">驾驶舱</button>
+        <button class="nav-btn" data-page="projects">项目雷达</button>
+        <button class="nav-btn" data-page="week">本周节奏</button>
+        <button class="nav-btn" data-page="review">收尾</button>
+        <button class="nav-btn" data-page="memory">记忆</button>
+      </nav>
+      <div class="top-actions">
+        <button class="btn small desktop-only" id="exportBtn">导出</button>
+        <button class="icon-btn" id="settingsBtn" aria-label="设置">⚙</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="page active" id="page-cockpit">
+        <div class="hero">
+          <div class="hero-copy">
+            <div class="eyebrow">WORK COCKPIT · NOT ANOTHER TODO LIST</div>
+            <h1><span id="greeting">早上好</span>，<em>Rainy</em>。</h1>
+            <p id="dailyLine">今天不需要推进所有项目。先让最重要的三个结果真实发生，再把低价值工作从你身上拿走。</p>
+            <div class="hero-meta">
+              <span class="chip"><span class="dot"></span><span id="dateLabel"></span></span>
+              <span class="chip" id="timeLabel"></span>
+              <span class="chip">深圳 · 晴天视觉模式</span>
+              <span class="chip">14:00–16:00 健身保护</span>
+            </div>
+          </div>
+          <div class="hero-focus">
+            <div class="hero-focus-head"><strong>今天的三个真实结果</strong><span class="chip"><span id="focusCount">0</span>/3</span></div>
+            <div class="focus-mini" id="focusMini"></div>
+          </div>
+        </div>
+
+        <div class="section-head">
+          <div><div class="kicker">01 · AI 初排，你来校准</div><h2>今日决策池</h2><p>事项可以很多，但真正进入今天的只有三件。拖动不是为了整理得漂亮，而是为了作出取舍。</p></div>
+          <div class="view-switch"><button class="active" data-view="matrix">四象限</button><button data-view="table">表格</button></div>
+        </div>
+        <div class="card pad">
+          <div class="quick-add">
+            <input class="input" id="quickTitle" placeholder="具体要解决什么问题？" />
+            <input class="input" id="quickStandard" placeholder="完成标准（必须明确）" />
+            <input class="input" id="quickProject" placeholder="所属项目" />
+            <button class="btn primary" id="quickAddBtn">加入决策池</button>
+          </div>
+          <div id="matrixView" class="priority-board"></div>
+          <div id="tableView" class="task-table-wrap" hidden></div>
+        </div>
+
+        <div class="section-head">
+          <div><div class="kicker">02 · 紧急不等于重要</div><h2>临时救火区</h2><p>临时事项先放这里，不自动吞掉今日核心。真正影响合同 KPI 时，再决定是否替换。</p></div>
+        </div>
+        <div class="rescue-strip">
+          <div class=
