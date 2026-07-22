@@ -1,0 +1,73 @@
+defaults);
+      const save = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      function toast(msg){ const t=el('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toast.timer); toast.timer=setTimeout(()=>t.classList.remove('show'),1900); }
+
+      function setScene(){
+        const h = new Date().getHours();
+        document.documentElement.dataset.scene = h < 12 ? 'morning' : h < 18 ? 'afternoon' : 'evening';
+        el('greeting').textContent = h < 12 ? '早上好' : h < 18 ? '下午好' : '晚上好';
+        const date = new Intl.DateTimeFormat('zh-CN',{month:'long',day:'numeric',weekday:'long'}).format(new Date());
+        const time = new Intl.DateTimeFormat('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date());
+        el('dateLabel').textContent = date;
+        el('timeLabel').textContent = time;
+      }
+
+      const zoneMeta = {
+        now:{title:'现在推进',desc:'高影响，且存在时间压力'},
+        plan:{title:'计划推进',desc:'重要，但不该靠救火推进'},
+        wait:{title:'等待 / 授权',desc:'有负责人和下次检查节点'},
+        park:{title:'暂不做',desc:'低价值、可取消或以后再说'}
+      };
+
+      function selectedTasks(){ return state.tasks.filter(t=>t.selected).slice(0,3); }
+      function renderFocus(){
+        const list=selectedTasks(); el('focusCount').textContent=list.length;
+        el('focusMini').innerHTML = list.length ? list.map((t,i)=>`<div class="focus-mini-item"><div class="focus-num">${i+1}</div><span>${esc(t.project)}｜${esc(t.title)}</span><small>${esc(t.estimate||'')}</small></div>`).join('') : '<div class="empty">从今日决策池里选出三件真正重要的事。</div>';
+      }
+
+      function renderMatrix(){
+        el('matrixView').innerHTML = Object.entries(zoneMeta).map(([zone,m])=>{
+          const items=state.tasks.filter(t=>t.zone===zone);
+          return `<section class="quadrant" data-zone="${zone}"><div class="quadrant-head"><div><strong>${m.title}</strong><span>${m.desc}</span></div><div class="count-pill">${items.length}</div></div><div>${items.map(taskCard).join('') || '<div class="empty">把事项拖到这里</div>'}</div></section>`;
+        }).join('');
+        bindTaskInteractions();
+      }
+      function taskCard(t){
+        return `<article class="task-card ${t.selected?'selected':''}" draggable="true" data-id="${t.id}"><div class="task-top"><button class="select-task" data-select="${t.id}" title="加入今日三件事">${t.selected?'✓':''}</button><div><span class="project-tag">${esc(t.project||'未分类')}</span><div class="task-title">${esc(t.title)}</div></div><button class="task-menu" data-edit="${t.id}">···</button></div><div class="task-standard"><b>完成标准：</b>${esc(t.standard)}</div>${t.why?`<p class="task-why"><b>为什么由我做：</b>${esc(t.why)}</p>`:''}<div class="task-meta">${t.due?`<span class="mini">截止 ${esc(t.due)}</span>`:''}${t.estimate?`<span class="mini">${esc(t.estimate)}</span>`:''}</div></article>`;
+      }
+
+      function renderTable(){
+        el('tableView').innerHTML = `<table class="task-table"><thead><tr><th>今日</th><th>项目 / 具体事项</th><th>完成标准</th><th>为什么由我做</th><th>截止</th><th>预计</th><th>当前判断</th><th></th></tr></thead><tbody>${state.tasks.map(t=>`<tr><td><input class="checkbox table-select" data-id="${t.id}" type="checkbox" ${t.selected?'checked':''}></td><td><div class="project-tag">${esc(t.project||'未分类')}</div><div class="table-title">${esc(t.title)}</div></td><td class="table-standard">${esc(t.standard)}</td><td class="table-standard">${esc(t.why||'—')}</td><td>${esc(t.due||'—')}</td><td>${esc(t.estimate||'—')}</td><td><select class="select table-zone" data-id="${t.id}" style="min-width:125px;padding:7px">${Object.entries(zoneMeta).map(([z,m])=>`<option value="${z}" ${z===t.zone?'selected':''}>${m.title}</option>`).join('')}</select></td><td><button class="btn small table-edit" data-id="${t.id}">编辑</button></td></tr>`).join('')}</tbody></table>`;
+        document.querySelectorAll('.table-select').forEach(x=>x.onchange=()=>toggleSelect(x.dataset.id));
+        document.querySelectorAll('.table-zone').forEach(x=>x.onchange=()=>{const t=state.tasks.find(a=>a.id===x.dataset.id);t.zone=x.value;save();renderTasks();});
+        document.querySelectorAll('.table-edit').forEach(x=>x.onclick=()=>openTaskModal(x.dataset.id));
+      }
+      function renderTasks(){
+        renderFocus();
+        if(state.view==='matrix'){el('matrixView').hidden=false;el('tableView').hidden=true;renderMatrix();}else{el('matrixView').hidden=true;el('tableView').hidden=false;renderTable();}
+        document.querySelectorAll('.view-switch button').forEach(b=>b.classList.toggle('active',b.dataset.view===state.view));
+      }
+
+      function bindTaskInteractions(){
+        document.querySelectorAll('[data-select]').forEach(b=>b.onclick=e=>{e.stopPropagation();toggleSelect(b.dataset.select);});
+        document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=e=>{e.stopPropagation();openTaskModal(b.dataset.edit);});
+        document.querySelectorAll('.task-card').forEach(card=>{
+          card.ondragstart=e=>{e.dataTransfer.setData('text/plain',card.dataset.id); e.dataTransfer.effectAllowed='move';};
+        });
+        document.querySelectorAll('.quadrant').forEach(q=>{
+          q.ondragover=e=>{e.preventDefault();q.classList.add('drag-over');};
+          q.ondragleave=()=>q.classList.remove('drag-over');
+          q.ondrop=e=>{e.preventDefault();q.classList.remove('drag-over');const id=e.dataTransfer.getData('text/plain');const t=state.tasks.find(x=>x.id===id);if(t){t.zone=q.dataset.zone;save();renderTasks();}};
+        });
+      }
+      function toggleSelect(id){
+        const t=state.tasks.find(x=>x.id===id); if(!t)return;
+        if(!t.selected && state.tasks.filter(x=>x.selected).length>=3){toast('今日核心最多三件。先取消一件，再做新的取舍。');return;}
+        t.selected=!t.selected; save(); renderTasks(); renderPrompts();
+      }
+
+      let editingTaskId=null;
+      function openTaskModal(id=null){
+        editingTaskId=id; const t=id?state.tasks.find(x=>x.id===id):null;
+        el('taskModalTitle').textContent=t?'编辑工作事项':'添加工作事项';
+        el('taskProject').value=t?.project||''; el('taskZone').value=t?.zone||'plan'; el('taskTitle').value=t?.title||''; el('taskStandard').value=
