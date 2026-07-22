@@ -1,0 +1,76 @@
+rgin-top:19px"><div><div class="kicker">DYNAMIC QUESTIONS</div><h2 style="font-size:18px">今天值得想清楚的问题</h2></div></div>
+            <div class="review-prompts" id="reviewPrompts"></div>
+            <label class="label" style="margin-top:14px">补充回答（可选）</label>
+            <textarea class="textarea" id="reviewAnswers" placeholder="看到哪个问题有感觉，就继续说。"></textarea>
+            <div style="margin-top:10px"><button class="btn" id="generateReviewBtn">整理成今日档案</button></div>
+          </div>
+          <div class="card pad">
+            <div class="card-header"><strong>今日整理结果</strong><span class="chip">原文完整保留</span></div>
+            <div class="review-output" id="reviewOutput">还没有整理。你的原始表达可以混乱，档案不需要混乱。</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-memory">
+        <div class="section-head">
+          <div><div class="kicker">SECOND BRAIN</div><h2>原始记录不丢，重要内容再慢慢长成记忆</h2><p>按天保存原文和档案；长期判断发生冲突时，不直接覆盖，而是让你确认。</p></div>
+          <div><button class="btn" id="exportMarkdownBtn">导出 Markdown</button> <button class="btn" id="exportJsonBtn">导出 JSON</button></div>
+        </div>
+        <div class="grid main-side">
+          <div class="card pad"><div class="memory-list" id="memoryList"></div></div>
+          <div class="card pad">
+            <strong>未来 GitHub 结构</strong>
+            <div style="margin-top:12px;color:var(--muted);font-size:12px;line-height:1.9">
+              <div><b>00-inbox/</b> 每日原始语音与临时输入</div>
+              <div><b>01-archive/</b> 整理后的每日工作档案</div>
+              <div><b>02-knowledge/</b> 稳定的个人判断与规律</div>
+              <div><b>03-skills/</b> SOP、案例和可复用能力</div>
+              <div><b>04-views/</b> 工作驾驶舱与成长视图</div>
+            </div>
+            <p style="color:var(--muted);font-size:11px;margin-top:14px">当前原型先保存在浏览器本地。GitHub 自动同步需要后续接入认证与服务端能力。</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal" id="taskModal">
+    <div class="modal-card">
+      <div class="modal-head"><div><h3 id="taskModalTitle">添加工作事项</h3><div style="color:var(--muted);font-size:12px">任务必须有明确结果，不接受“推进项目”这类空表达。</div></div><button class="icon-btn" data-close="taskModal">×</button></div>
+      <div class="form-grid">
+        <div class="form-group"><label class="label">所属项目</label><input class="input" id="taskProject"/></div>
+        <div class="form-group"><label class="label">当前象限</label><select class="select" id="taskZone"><option value="now">现在推进</option><option value="plan">计划推进</option><option value="wait">等待 / 授权</option><option value="park">暂不做</option></select></div>
+        <div class="form-group full"><label class="label">具体问题 / 任务标题</label><input class="input" id="taskTitle"/></div>
+        <div class="form-group full"><label class="label">完成标准（必填）</label><textarea class="textarea" id="taskStandard"></textarea></div>
+        <div class="form-group full"><label class="label">为什么值得 Rainy 亲自做</label><textarea class="textarea" id="taskWhy"></textarea></div>
+        <div class="form-group"><label class="label">截止时间</label><input class="input" id="taskDue" type="date"/></div>
+        <div class="form-group"><label class="label">预计投入</label><input class="input" id="taskEstimate" placeholder="如 30–45 分钟"/></div>
+      </div>
+      <div class="modal-actions"><button class="btn ghost" data-close="taskModal">取消</button><button class="btn danger" id="deleteTaskBtn" hidden>删除</button><button class="btn primary" id="saveTaskBtn">保存</button></div>
+    </div>
+  </div>
+
+  <div class="modal" id="projectModal">
+    <div class="modal-card">
+      <div class="modal-head"><div><h3>添加项目</h3><div style="color:var(--muted);font-size:12px">只维护合同目标、进度、风险和下一动作。</div></div><button class="icon-btn" data-close="projectModal">×</button></div>
+      <div class="form-grid">
+        <div class="form-group"><label class="label">负责人</label><input class="input" id="projectOwner"/></div>
+        <div class="form-group"><label class="label">客户 / 项目</label><input class="input" id="projectName"/></div>
+        <div class="form-group full"><label class="label">本期合同目标</label><input class="input" id="projectKpi" placeholder="如 20 篇、≥15 万曝光、含 3 篇热帖"/></div>
+        <div class="form-group"><label class="label">当前完成百分比</label><input class="input" id="projectProgress" type="number" min="0" max="100" value="0"/></div>
+        <div class="form-group"><label class="label">风险等级</label><select class="select" id="projectRisk"><option value="low">正常推进</option><option value="mid">需要关注</option><option value="high">交付风险</option></select></div>
+        <div class="form-group full"><label class="label">当前最大风险</label><input class="input" id="projectRiskText"/></div>
+        <div class="form-group full"><label class="label">下一动作</label><input class="input" id="projectNext"/></div>
+      </div>
+      <div class="modal-actions"><button class="btn ghost" data-close="projectModal">取消</button><button class="btn primary" id="saveProjectBtn">保存</button></div>
+    </div>
+  </div>
+
+  <div class="modal" id="rescueModal">
+    <div class="modal-card">
+      <div class="modal-head"><div><h3>添加临时救火事项</h3><div style="color:var(--muted);font-size:12px">先判断它是否真的需要替换今日核心。</div></div><button class="icon-btn" data-close="rescueModal">×</button></div>
+      <label class="label">发生了什么</label><input class="input" id="rescueInput"/>
+      <label class="label" style="margin-top:10px">不处理会影响什么</label><textarea class="textarea" id="rescueImpact"></textarea>
+      <div class="modal-actions"><button class="btn ghost" data-close="rescueModal">取消</button><button class="btn peach" id="saveRescueBtn">放入救火区</button></div>
+    </div>
+  <
