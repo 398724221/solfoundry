@@ -1,0 +1,74 @@
+/div>
+
+  <div class="modal" id="settingsModal">
+    <div class="modal-card">
+      <div class="modal-head"><div><h3>驾驶舱设置</h3><div style="color:var(--muted);font-size:12px">减少维护，而不是增加规则。</div></div><button class="icon-btn" data-close="settingsModal">×</button></div>
+      <div class="form-grid">
+        <div class="form-group"><label class="label">称呼</label><input class="input" id="settingName" value="Rainy"/></div>
+        <div class="form-group"><label class="label">城市</label><input class="input" id="settingCity" value="深圳"/></div>
+        <div class="form-group"><label class="label">工作开始</label><input class="input" id="settingStart" type="time" value="10:00"/></div>
+        <div class="form-group"><label class="label">工作结束</label><input class="input" id="settingEnd" type="time" value="19:00"/></div>
+        <div class="form-group"><label class="label">午饭</label><input class="input" id="settingLunch" type="time" value="11:30"/></div>
+        <div class="form-group"><label class="label">健身开始</label><input class="input" id="settingGym" type="time" value="14:00"/></div>
+      </div>
+      <div class="modal-actions"><button class="btn ghost" data-close="settingsModal">取消</button><button class="btn primary" id="saveSettingsBtn">保存</button></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    (() => {
+      'use strict';
+      const STORAGE_KEY = 'rainy-living-world-v2';
+      const todayKey = new Date().toISOString().slice(0,10);
+      const uid = () => Math.random().toString(36).slice(2,9) + Date.now().toString(36).slice(-4);
+      const el = id => document.getElementById(id);
+      const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+      const clone = o => JSON.parse(JSON.stringify(o));
+
+      const defaults = {
+        profile: { name:'Rainy', city:'深圳', start:'10:00', end:'19:00', lunch:'11:30', gym:'14:00' },
+        tasks: [
+          {id:uid(), project:'Enter', title:'确认剩余内容本周能否完成审核', standard:'拿到可发布数量、未通过原因，并确定新的发布计划。', why:'涉及客户预期与本周交付节奏，需要 Rainy 判断是否调整方案。', due:todayKey, estimate:'30–45 分钟', zone:'now', selected:true},
+          {id:uid(), project:'Ulike', title:'确定下一批内容的人群与社区优先级', standard:'确认优先测试的 3 组人群场景，并给出对应社区方向。', why:'决定后续内容是否继续分散，属于方向性判断。', due:'', estimate:'45 分钟', zone:'plan', selected:true},
+          {id:uid(), project:'团队流程', title:'整理一个反复出现的审核卡点', standard:'写清问题、根因、下一次的处理规则，形成一条可复用 SOP。', why:'这是个人资产任务，可减少未来重复沟通。', due:'', estimate:'30 分钟', zone:'plan', selected:true},
+          {id:uid(), project:'LinkedNav', title:'等待组员补充最新发布数据', standard:'负责人给出存活、曝光和下一发布节点。', why:'当前不需要 Rainy 亲自处理，只需确认下次检查时间。', due:'', estimate:'5 分钟', zone:'wait', selected:false},
+          {id:uid(), project:'杂项', title:'逐条回复所有非紧急群消息', standard:'无', why:'不直接影响项目结果，不应占用核心工作时间。', due:'', estimate:'不建议投入', zone:'park', selected:false}
+        ],
+        rescue: [],
+        baselines: { english:false, gym:false, moment:false, off:false },
+        captures: [],
+        projects: [
+          {id:uid(), owner:'组员 A', name:'Enter', kpi:'20 篇内容 + 曝光目标', progress:68, risk:'high', riskText:'审核标准变化，可能影响本周发布', next:'确认审核边界与替换方案', updated:'今天'},
+          {id:uid(), owner:'组员 A', name:'Ulike', kpi:'人群种草 + 社区覆盖', progress:45, risk:'mid', riskText:'内容方向仍较分散', next:'确定 3 组优先测试人群', updated:'昨天'},
+          {id:uid(), owner:'组员 B', name:'LinkedNav', kpi:'冷启动内容与社区验证', progress:72, risk:'low', riskText:'正常推进', next:'补充数据与社区反馈', updated:'2 天前'},
+          {id:uid(), owner:'组员 C', name:'DESLOC', kpi:'社区建设 + 种草曝光', progress:26, risk:'mid', riskText:'客户意向与交付范围未完全锁定', next:'确认方案边界与报价版本', updated:'3 天前'},
+          {id:uid(), owner:'组员 D', name:'腾讯视频海外', kpi:'品牌曝光 + 剧集规模化传播', progress:34, risk:'mid', riskText:'报价口径与客户预期仍需统一', next:'锁定首期交付与付款口径', updated:'3 天前'}
+        ],
+        timeline: [
+          {time:'10:00–11:20', title:'项目状态与需要别人配合的事项', note:'先解决依赖和拍板，减少全天悬挂。', type:'work'},
+          {time:'11:20–12:00', title:'提前吃饭，离开屏幕', note:'避开高峰，不用把吃饭拖到健身前。', type:'meal'},
+          {time:'12:00–14:00', title:'安静推进 / 方案 / 个人资产', note:'适合完成不依赖组员在线的深度工作。', type:'work'},
+          {time:'14:00–16:00', title:'健身保护区', note:'约 1.5 小时训练 + 30 分钟缓冲，可手动调整。', type:'protected'},
+          {time:'16:00–17:30', title:'沟通、跟进与项目推进', note:'集中处理需要外部回应的事项。', type:'work'},
+          {time:'17:30–18:30', title:'晚饭和恢复', note:'不把吃饭当成拖延。', type:'meal'},
+          {time:'18:30–19:00', title:'轻量收尾与明日入口', note:'不写长篇复盘，只把脑内悬挂交给系统。', type:'work'}
+        ],
+        week: { focus:'', monday:'', thursday:'', stop:'' },
+        reviewDraft: { raw:'', answers:'', output:'' },
+        memories: [],
+        view:'matrix'
+      };
+
+      function merge(obj, base) {
+        if (Array.isArray(base)) return Array.isArray(obj) ? obj : clone(base);
+        if (base && typeof base === 'object') {
+          const out = {...base};
+          Object.keys(base).forEach(k => out[k] = merge(obj?.[k], base[k]));
+          Object.keys(obj || {}).forEach(k => { if (!(k in out)) out[k]=obj[k]; });
+          return out;
+        }
+        return obj ?? base;
+      }
+      let state = merge(JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'), 
