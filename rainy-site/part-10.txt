@@ -1,0 +1,56 @@
+[0].project}」上，真正形成了什么结果？如果没有，具体卡在哪里？`);
+        if(state.rescue[0])prompts.push(`临时事项「${state.rescue[0].title}」是否真的值得打断原计划？下次能否更早发现？`);
+        prompts.push('今天有没有哪件事做了很多，却没有推动核心结果？');
+        prompts.push('今天有什么值得的时刻，证明生活不只是完成工作？');
+        el('reviewPrompts').innerHTML=prompts.slice(0,3).map(x=>`<div class="prompt">${esc(x)}</div>`).join('');
+      }
+      function generateReview(){
+        const raw=el('reviewRaw').value.trim(), answers=el('reviewAnswers').value.trim();
+        if(!raw&&!answers){toast('先说一点今天真实发生的事情');return;}
+        const done=selectedTasks().map(t=>`- ${t.project}｜${t.title}\n  完成标准：${t.standard}`).join('\n')||'- 未选择今日核心';
+        const captures=state.captures.slice(0,5).map(c=>`- ${c.text}`).join('\n')||'- 无';
+        const baselines=Object.entries(state.baselines).filter(([,v])=>v).map(([k])=>baselineMeta[k][0]).join('、')||'暂无';
+        state.reviewDraft.raw=raw; state.reviewDraft.answers=answers;
+        state.reviewDraft.output=`# ${todayKey} · Rainy 每日工作档案\n\n## 原始表达\n${raw||'（无）'}\n\n## 今日核心事项\n${done}\n\n## 临时想法与悬挂\n${captures}\n\n## 补充判断\n${answers||'（待后续整理）'}\n\n## 生活底线\n已保留：${baselines}\n\n## 明天入口\n从今天未完成但仍然重要的事项中重新判断，不自动把所有任务滚动到明天。`;
+        save(); el('reviewOutput').textContent=state.reviewDraft.output; toast('已经整理成今日档案');
+      }
+      function saveReview(){
+        if(!state.reviewDraft.output)generateReview(); if(!state.reviewDraft.output)return;
+        const item={id:uid(),date:todayKey,raw:state.reviewDraft.raw,answers:state.reviewDraft.answers,output:state.reviewDraft.output,savedAt:new Date().toISOString()};
+        const idx=state.memories.findIndex(x=>x.date===todayKey); if(idx>=0)state.memories[idx]=item;else state.memories.push(item);
+        save();renderMemories();toast('今日原文与档案已保存');
+      }
+      function renderReview(){el('reviewRaw').value=state.reviewDraft.raw;el('reviewAnswers').value=state.reviewDraft.answers;el('reviewOutput').textContent=state.reviewDraft.output||'还没有整理。你的原始表达可以混乱，档案不需要混乱。';renderPrompts();}
+      function renderMemories(){
+        el('memoryList').innerHTML=state.memories.length?[...state.memories].reverse().map(m=>`<article class="memory-card"><time>${esc(m.date)}</time><h3>每日工作档案</h3><p>${esc(m.output)}</p></article>`).join(''):'<div class="empty">还没有保存每日档案。第一份记录不需要完美，只需要真实。</div>';
+      }
+
+      function exportFile(content,name,type='text/plain') { const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url); }
+      function exportJson(){exportFile(JSON.stringify(state,null,2),`rainy-living-world-${todayKey}.json`,'application/json');toast('JSON 已导出');}
+      function exportMarkdown(){const text=state.memories.map(m=>m.output).join('\n\n---\n\n')||'# Rainy Living World\n\n暂无每日档案。';exportFile(text,`rainy-daily-archive-${todayKey}.md`,'text/markdown');toast('Markdown 已导出');}
+
+      function voiceTo(targetId, button){
+        const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+        if(!SR){toast('当前浏览器不支持语音识别，可继续使用系统语音输入。');return;}
+        const rec=new SR(); rec.lang='zh-CN';rec.continuous=true;rec.interimResults=true;
+        const original=button.textContent; button.textContent='正在听…';
+        rec.onresult=e=>{let final='',interim='';for(let i=e.resultIndex;i<e.results.length;i++){const s=e.results[i][0].transcript;if(e.results[i].isFinal)final+=s;else interim+=s;} const target=el(targetId); if(final)target.value=(target.value+' '+final).trim(); button.title=interim;};
+        rec.onerror=()=>{button.textContent=original;toast('语音识别没有成功，请再试一次。');};rec.onend=()=>button.textContent=original;rec.start();
+      }
+
+      function openModal(id){el(id).classList.add('open');}
+      function closeModal(id){el(id).classList.remove('open');}
+      function renderSettings(){const p=state.profile;el('settingName').value=p.name;el('settingCity').value=p.city;el('settingStart').value=p.start;el('settingEnd').value=p.end;el('settingLunch').value=p.lunch;el('settingGym').value=p.gym;}
+      function saveSettings(){state.profile={name:el('settingName').value.trim()||'Rainy',city:el('settingCity').value.trim()||'深圳',start:el('settingStart').value,end:el('settingEnd').value,lunch:el('settingLunch').value,gym:el('settingGym').value};save();closeModal('settingsModal');toast('设置已保存');}
+
+      function goPage(page){document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===page));document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===`page-${page}`));window.scrollTo({top:0,behavior:'smooth'});}
+
+      function renderAll(){setScene();renderTasks();renderRescue();renderTimeline();renderBaselines();renderCaptures();renderProjects();renderGarden();renderWeek();renderReview();renderMemories();renderSettings();}
+
+      document.querySelectorAll('.nav-btn').forEach(b=>b.onclick=()=>goPage(b.dataset.page));
+      document.querySelectorAll('.view-switch button').forEach(b=>b.onclick=()=>{state.view=b.dataset.view;save();renderTasks();});
+      document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>closeModal(b.dataset.close));
+      document.querySelectorAll('.modal').forEach(m=>m.onclick=e=>{if(e.target===m)closeModal(m.id);});
+      el('quickAddBtn').onclick=quickAdd; el('quickTitle').onkeydown=e=>{if(e.key==='Enter')quickAdd();};
+      el('saveTaskBtn').onclick=saveTask; el('deleteTaskBtn').onclick=()=>{if(editingTaskId&&confirm('删除这条工作事项？')){state.tasks=state.tasks.filter(x=>x.id!==editingTaskId);save();closeModal('taskModal');renderTasks();}};
+      el('addRescueBtn').onclick=()=>openModal('rescueModal'); el('saveRescueBtn').onclick=()=>{const title=el('rescueInput').value.trim();if(!title){toast('先写发生了
